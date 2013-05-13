@@ -10,6 +10,7 @@
 #define MD_ERR_MALLOC       1
 #define MD_ERR_FOPEN        2
 #define MD_ERR_INPUT_FMT    3
+#define MD_ERR_INPUT_DATA   4
 
 /******************************************************************************
  *
@@ -48,7 +49,7 @@ struct atom_list
 {
     unsigned int count;     /**<@brief Number of atoms in this collection (nmol) */
     unsigned int *index;    /**<@brief Global unique identifier for each atom */
-    unsigned int *ltype;    /**<@brief Element type for each atom */
+    unsigned int *type;     /**<@brief Element type for each atom */
     double      *pos,       /**<@brief Position vector on each atom */
                 *vel,       /**<@brief Velocity vector on each atom */
                 *accel,     /**<@brief Acceleration vector on each atom */
@@ -66,10 +67,11 @@ struct system_info
 /** @brief simulation parameters such as potential parameters */
 struct sim_params
 {
-    int num_ltypes;         /**<@brief Number of ltypes (jtype) */
-    int *elements;          /**<@brief Maps ltypes to elements */
+    int num_types;          /**<@brief Number of ltypes (jtype) */
+    int *ltype;             /**<@brief Maps ltypes to elements */
+    double timestep;        /**<@brief integrator timestep */
     double *mass;           /**<@brief Mass of atom type (grams per atom */
-    double *inv_mass;       /**<@brief 1/mass */
+    double *time_over_mass; /**<@brief timestep**2/(2*mass) */
     double **pair_param;    /**<@brief Array of pairwise potential parameters */
     PAIR_STYLE calculate_2body; /**<@brief Function to calculate 2body interactions */
     MULTIBODY_STYLE calculate_3body;    /**<@brief Function to calculate 3body interactions */
@@ -100,8 +102,8 @@ struct cell_map
  ******************************************************************************/
 void init_simulation
 (
-    sim_params_t *simulation_parameters,
-    system_info_t *system_info 
+    sim_params_t **simulation_parameters,
+    system_info_t **system_info 
 );
 
 void simulate
@@ -156,12 +158,24 @@ atom_list_t *get_starting_config
     system_info_t *system_info 
 );
 
+atom_list_t *get_starting_config_xyz
+(
+    sim_params_t *simulation_parameters,
+    system_info_t *system_info 
+);
+
 cell_map_t *create_link_cell
 ( 
     system_info_t *system_info, 
     atom_list_t *atoms 
 );
 
+void init_constants
+(
+    sim_params_t *simulation_parameters,
+    system_info_t *system_info 
+);
+
 void modify_starting_config( system_info_t *system_info, atom_list_t *atoms );
 void get_input_params( sim_params_t *simulation_parameters );
-
+void dump_table( sim_params_t *simulation_parameters );

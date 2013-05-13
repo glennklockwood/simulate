@@ -20,7 +20,13 @@
  */
 cell_map_t *create_link_cell( system_info_t *system_info, atom_list_t *atoms )
 {
-    cell_map_t *cell_list; 
+    static cell_map_t *cell_list; 
+
+    if ( cell_list )
+    {
+        free(cell_list);
+    }
+
     cell_list = malloc(sizeof(*cell_list));
 
     if (!cell_list)
